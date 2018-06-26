@@ -108,6 +108,16 @@ defmodule Ecto.Query.Builder.SelectTest do
              %{0 => {:map, [:title, :body]}}
     end
 
+    test "supports '...' in binding list with no prior select" do
+      query =
+        "posts"
+        |> select_merge([..., p], %{title: p.title})
+
+      assert Macro.to_string(query.select.expr) == "merge(&0, %{title: &0.title()})"
+      assert query.select.params == []
+      assert query.select.take == %{}
+    end
+
     test "defaults to struct" do
       query = select_merge("posts", [p], %{title: nil})
       assert Macro.to_string(query.select.expr) == "merge(&0, %{title: nil})"
